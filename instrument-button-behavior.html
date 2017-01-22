@@ -1,0 +1,49 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+/**
+* Behavior that highlights stuff.
+*
+* @polymerBehavior
+*/
+    InstrumentButtonBehavior= {
+        properties:{
+            playbackEventQueue: {
+                type: Array,
+                value: []
+            },
+            instrumentEventQueue: {
+                type: Array,
+                value: []
+            }
+        },
+        update: function () {
+            var next;
+            while (this.playbackEventQueue.length > 0) {
+                next = this.playbackEventQueue[this.playbackEventQueue.length - 1];
+                if (next.detail.time < context.currentTime) {
+                    this.playbackState = next.detail.buttonState;
+                    this.playbackEventQueue.pop();
+                } else {
+                    break;
+                }
+            }
+            while (this.instrumentEventQueue.length > 0) {
+                next = this.instrumentEventQueue[this.instrumentEventQueue.length - 1];
+                if (next.detail.time < context.currentTime) {
+                    this.state = next.detail.buttonState;
+                    this.instrumentEventQueue.pop();
+                } else {
+                    break;
+                }
+            }
+        },
+        addButtonAction: function (e) {
+            if (e.detail.origin === 'playback')
+                this.playbackEventQueue.unshift(e);
+            if (e.detail.origin === 'instrument') {
+                this.instrumentEventQueue.unshift(e);
+            }
+        }
+    } ;
+</script>

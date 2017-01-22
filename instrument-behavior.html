@@ -1,0 +1,35 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+/**
+* Behavior that highlights stuff.
+*
+* @polymerBehavior
+*/
+    InstrumentBehavior= {
+        properties:{
+            volume: {
+                type: Number,
+                value: 60
+            },
+            tone: {
+                type: Number,
+                value: 0
+            },
+            changingPitch: {
+                type: Boolean,
+                value: false
+            },
+            showingNotes:{
+                type:Boolean,
+                value:false
+            }
+        },
+        update: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].update() ;
+            }
+        }
+    } ;
+</script>
