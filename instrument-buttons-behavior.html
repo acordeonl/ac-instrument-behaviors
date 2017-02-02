@@ -1,0 +1,55 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<script>
+/**
+* Behavior that highlights stuff.
+*
+* @polymerBehavior
+*/
+    InstrumentButtonsBehavior= {
+        properties:{
+            name:{
+                type:String
+            },
+            instrumentVelocity:{
+                type:Number,
+                value:1
+            },
+            instrumentVolume: {
+                type: Number,
+                value:1
+            },
+            playbackVolume: {
+                type: Number,
+                value:1
+            },
+            tone: {
+                type: Number,
+                value: 0
+            },
+            changingPitch: {
+                type: Boolean,
+                value: false
+            },
+            showingNotes:{
+                type:Boolean,
+                value:false
+            }
+        },
+        reportInstrument: function(){
+            this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100}) ;
+        },
+        toggleNotesOnButtons: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].showingNotes = !nodeList[i].showingNotes ;
+            }
+        },
+        update: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].update() ;
+            }
+        }
+    } ;
+</script>
