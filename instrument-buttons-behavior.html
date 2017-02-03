@@ -39,10 +39,15 @@
         reportInstrument: function(){
             this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100}) ;
         },
-        toggleNotesOnButtons: function(){
+        toggleNotesOnButtons: function(which){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].showingNotes = !nodeList[i].showingNotes ;
+                if(which==='playback'){
+                    nodeList[i].showingPlaybackNotes = !nodeList[i].showingPlaybackNotes ;
+                }
+                else{
+                    nodeList[i].showingInstrumentNotes = !nodeList[i].showingInstrumentNotes ;
+                }
             }
         },
         update: function(){

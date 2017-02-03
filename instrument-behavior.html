@@ -79,10 +79,10 @@
                 nodeList[i].changePitch(diff) ;
             }
         },
-        toggleNotes: function () {
+        toggleNotes: function (which) {
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].toggleNotesOnButtons() ;
+                nodeList[i].toggleNotesOnButtons(which) ;
             }
         },
         _reportInstruments: function(){

@@ -15,7 +15,23 @@
             instrumentEventQueue: {
                 type: Array,
                 value: []
-            }
+            },
+            instrumentNote: {
+                type: String,
+                value: ""
+            },
+            playBackNote: {
+                type: String,
+                value: ""
+            },
+            showingPlaybackNotes:{
+                type:Boolean,
+                value:false
+            },
+            showingInstrumentNotes:{
+                type:Boolean,
+                value:false
+            },
         },
         update: function () {
             var next;
