@@ -55,6 +55,15 @@
             for (var i = 0; i < nodeList.length; i++) {
                 nodeList[i].update() ;
             }
+        },
+        setOpacity: function(which,opacity){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
+            for (var i = 0; i < nodeList.length; i++) {
+                if (which==='playback')
+                    nodeList[i].playbackOpacity = opacity/100 ;
+                else
+                    nodeList[i].instrumentOpacity = opacity/100 ;
+            }
         }
     } ;
 </script>

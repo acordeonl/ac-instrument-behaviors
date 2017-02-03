@@ -8,9 +8,9 @@
 */
     InstrumentButtonBehavior= {
         properties:{
-            playbackEventQueue: {
-                type: Array,
-                value: []
+            insrumentOpacity:{
+                type:Number,
+                value:1
             },
             instrumentEventQueue: {
                 type: Array,
@@ -20,6 +20,22 @@
                 type: String,
                 value: ""
             },
+            showingInstrumentNotes:{
+                type:Boolean,
+                value:false
+            },
+            instrumentState: {
+                type: Number,
+                value:0
+            },
+            playbackOpacity:{
+                type:Number,
+                value:1
+            },
+            playbackEventQueue: {
+                type: Array,
+                value: []
+            },
             playBackNote: {
                 type: String,
                 value: ""
@@ -28,10 +44,10 @@
                 type:Boolean,
                 value:false
             },
-            showingInstrumentNotes:{
-                type:Boolean,
-                value:false
-            },
+            playbackState: {
+                type: Number,
+                value:0
+            }
         },
         update: function () {
             var next;
@@ -47,7 +63,7 @@
             while (this.instrumentEventQueue.length > 0) {
                 next = this.instrumentEventQueue[this.instrumentEventQueue.length - 1];
                 if (next.detail.time < context.currentTime) {
-                    this.state = next.detail.buttonState;
+                    this.instrumentState = next.detail.buttonState;
                     this.instrumentEventQueue.pop();
                 } else {
                     break;
