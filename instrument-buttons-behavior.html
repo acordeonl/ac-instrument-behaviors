@@ -11,22 +11,28 @@
             name:{
                 type:String
             },
-            instrumentVelocity:{
+            // TODO:  ----- cargar valores de iron local -----
+            instrumentPanning:{
+                type:Number,
+                value:0
+            },
+            playbackPanning:{
+                type:Number,
+                value:0
+            },
+            instrumentVolume:{
                 type:Number,
                 value:1
             },
-            instrumentVolume: {
-                type: Number,
-                value:1
-            },
-            playbackVolume: {
-                type: Number,
+            playbackVolume:{
+                type:Number,
                 value:1
             },
             tone: {
                 type: Number,
                 value: 0
             },
+            // ----------------------------------------
             changingPitch: {
                 type: Boolean,
                 value: false
@@ -36,8 +42,14 @@
                 value:false
             }
         },
+        update: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].update() ;
+            }
+        },
         reportInstrument: function(){
-            this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100}) ;
+            this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
         },
         toggleNotesOnButtons: function(which){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
@@ -50,12 +62,6 @@
                 }
             }
         },
-        update: function(){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].update() ;
-            }
-        },
         setOpacity: function(which,opacity){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
@@ -63,6 +69,44 @@
                     nodeList[i].playbackOpacity = opacity/100 ;
                 else
                     nodeList[i].instrumentOpacity = opacity/100 ;
+            }
+        },
+        setVelocity: function(velocity){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setVelocity(velocity/127) ;
+            }
+        },
+        setInstrumentPanning: function(panning){
+            // TODO: save on local storage
+            this.instrumentPanning = panning/100 ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setInstrumentPanning(panning/100) ;
+            }
+        },
+        setPlaybackPanning: function(panning){
+            // TODO: save on local storage
+            this.playbackPanning = panning/100 ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setPlaybackPanning(panning/100) ;
+            }
+        },
+        setPlaybackVolume: function(volume){
+            // TODO:  save on local storge
+            this.playbackVolume = volume/100 ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setPlaybackGain(volume/100) ;
+            }
+        },
+        setInstrumentVolume: function(volume){
+            // TODO:  save on local storage
+            this.instrumentVolume = volume/100 ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setInstrumentGain(volume/100) ;
             }
         }
     } ;

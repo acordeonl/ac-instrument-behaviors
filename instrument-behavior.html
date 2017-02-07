@@ -15,33 +15,22 @@
                 type: Boolean,
                 value: false
             },
-            velocity: {
-                type: Number,
-                value: 1
-            },
-            volumes: {
-                type: Array,
-                value: []
-            },
-            tone: {
-                type: Number,
-                value: 0
-            },
         },
+
+        // ------------- midi ---------------------
         _action: function (e) {
             if (this.recording && e.detail.fromPlayer === undefined && e.detail.channel !== 2)
                 this.$$('AC-RECORDER').addInstrumentActivity(e.detail.cmd, e.detail.midiNote, e.detail.channel);
             if (e.detail.cmd==='velocity-change') {
-                this.velocity = (e.detail.velocity/127) ;
+                this._setVelocity (e.detail.velocity) ;
             }
             this._instrumentAction(e) ;
         },
-        changeVolume: function (e) {
-            if(e.detail.origin==='instrument') {
-                this.$$('[name='+e.detail.instrumentName+']').instrumentVolume = e.detail.volume/100 ;
-            }
-            else{
-                this.$$('[name='+e.detail.instrumentName+']').playbackVolume = e.detail.volume/100 ;
+        _setVelocity: function(velocity){
+            noteNotFound = false ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setVelocity(velocity) ;
             }
         },
         // ------------- GUI update ---------------------
@@ -72,6 +61,13 @@
         pause: function () {
             this.$$('AC-PLAYER').pause();
         },
+        // ------------- settings controls --------------
+        _reportInstruments: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].reportInstrument() ;
+            }
+        },
         changePitch: function (diff) {
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
@@ -85,12 +81,6 @@
                 nodeList[i].toggleNotesOnButtons(which) ;
             }
         },
-        _reportInstruments: function(){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].reportInstrument() ;
-            }
-        },
         setOpacity: function(which,opacity){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
@@ -101,6 +91,23 @@
             synthReverb = value ;
             wet.gain.value = ( 1.0 - ((100-synthReverb)/100) );
             dry.gain.value = (100-synthReverb)/100;
+        },
+        changeVolume: function (e) {
+            if(e.detail.origin==='instrument') {
+                this.$$('[name='+e.detail.instrumentName+']').setInstrumentVolume(e.detail.volume) ;
+            }
+            else{
+                this.$$('[name='+e.detail.instrumentName+']').setPlaybackVolume(e.detail.volume) ;
+            }
+        },
+        setPanning: function(e){
+            if(e.detail.origin==='instrument') {
+                this.$$('[name='+e.detail.instrumentName+']').setInstrumentPanning(e.detail.panning) ;
+
+            }
+            else{
+                this.$$('[name='+e.detail.instrumentName+']').setPlaybackPanning(e.detail.panning) ;
+            }
         },
         ready: function () {
             Polymer.RenderStatus.afterNextRender(this, function () {
