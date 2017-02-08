@@ -11,28 +11,34 @@
             name:{
                 type:String
             },
-            // TODO:  ----- cargar valores de iron local -----
+            rotation:{
+                type:Boolean,
+                value:false
+            },
             instrumentPanning:{
                 type:Number,
-                value:0
+                value:0,
+                observer:'_setSynthInstrumentPanning'
             },
             playbackPanning:{
                 type:Number,
-                value:0
+                value:0,
+                observer:'_setSynthPlaybackPanning'
             },
             instrumentVolume:{
                 type:Number,
-                value:1
+                value:1,
+                observer:'_setSynthInstrumentVolume'
             },
             playbackVolume:{
                 type:Number,
-                value:1
+                value:1,
+                observer:'_setSynthPlaybackVolume'
             },
             tone: {
                 type: Number,
                 value: 0
             },
-            // ----------------------------------------
             changingPitch: {
                 type: Boolean,
                 value: false
@@ -51,14 +57,14 @@
         reportInstrument: function(){
             this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
         },
-        toggleNotesOnButtons: function(which){
+        toggleNotesOnButtons: function(which,value){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
                 if(which==='playback'){
-                    nodeList[i].showingPlaybackNotes = !nodeList[i].showingPlaybackNotes ;
+                    nodeList[i].showingPlaybackNotes = value ;
                 }
                 else{
-                    nodeList[i].showingInstrumentNotes = !nodeList[i].showingInstrumentNotes ;
+                    nodeList[i].showingInstrumentNotes = value ;
                 }
             }
         },
@@ -66,47 +72,39 @@
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
                 if (which==='playback')
-                    nodeList[i].playbackOpacity = opacity/100 ;
+                    nodeList[i].playbackOpacity = opacity ;
                 else
-                    nodeList[i].instrumentOpacity = opacity/100 ;
+                    nodeList[i].instrumentOpacity = opacity ;
             }
         },
         setVelocity: function(velocity){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setVelocity(velocity/127) ;
+                nodeList[i].setVelocity(velocity) ;
             }
         },
-        setInstrumentPanning: function(panning){
-            // TODO: save on local storage
-            this.instrumentPanning = panning/100 ;
+        _setSynthInstrumentPanning: function(panning){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setInstrumentPanning(panning/100) ;
+                nodeList[i].setInstrumentPanning(panning) ;
             }
         },
-        setPlaybackPanning: function(panning){
-            // TODO: save on local storage
-            this.playbackPanning = panning/100 ;
+        _setSynthPlaybackPanning: function(panning){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setPlaybackPanning(panning/100) ;
+                nodeList[i].setPlaybackPanning(panning) ;
             }
         },
-        setPlaybackVolume: function(volume){
-            // TODO:  save on local storge
-            this.playbackVolume = volume/100 ;
+        _setSynthPlaybackVolume: function(volume){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setPlaybackGain(volume/100) ;
+                nodeList[i].setPlaybackGain(volume) ;
             }
         },
-        setInstrumentVolume: function(volume){
-            // TODO:  save on local storage
-            this.instrumentVolume = volume/100 ;
+        _setSynthInstrumentVolume: function(volume){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setInstrumentGain(volume/100) ;
+                nodeList[i].setInstrumentGain(volume) ;
             }
         }
     } ;
