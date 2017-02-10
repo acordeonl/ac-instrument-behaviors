@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+1<link rel="import" href="../polymer/polymer.html">
 
 <script>
 /**
@@ -63,6 +63,10 @@
         },
         pause: function () {
             this.$$('AC-PLAYER').pause();
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].pause() ;
+            }
         },
         // ------------- settings controls --------------
         _reportInstruments: function(){
@@ -71,11 +75,11 @@
                 nodeList[i].reportInstrument() ;
             }
         },
-        setPitch: function (diff) {
+        addPitch: function (diff) {
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setPitch(diff) ;
+                nodeList[i].addPitch(diff) ;
             }
         },
         toggleNotes: function (which,value) {

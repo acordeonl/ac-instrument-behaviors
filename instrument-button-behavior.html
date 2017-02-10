@@ -70,6 +70,9 @@
                 }
             }
         },
+        pause: function(){
+            this.playbackEventQueue = [] ;
+        },
         addButtonAction: function (e) {
             if (e.detail.origin === 'playback')
                 this.playbackEventQueue.unshift(e);
