@@ -1,4 +1,4 @@
-1<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer/polymer.html">
 
 <script>
 /**
@@ -63,10 +63,17 @@
         },
         pause: function () {
             this.$$('AC-PLAYER').pause();
+            this._stopAudio() ;
+        },
+        _stopAudio: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].pause() ;
+                nodeList[i].stopAudio() ;
             }
+        },
+        setTempo: function(e){
+            this._stopAudio() ;
+            this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
         },
         // ------------- settings controls --------------
         _reportInstruments: function(){

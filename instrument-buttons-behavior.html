@@ -83,14 +83,14 @@
                 nodeList[i].setVelocity(velocity) ;
             }
         },
-        pause: function(){
+        stopAudio: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].pause() ;
+                nodeList[i].stop() ;
             }
             nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].pause();
+                nodeList[i].stop();
             }
         },
         _setSynthInstrumentPanning: function(panning){
