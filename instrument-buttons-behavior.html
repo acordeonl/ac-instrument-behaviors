@@ -7,10 +7,18 @@
 * @polymerBehavior
 */
     InstrumentButtonsBehavior= {
-        listener:{'note-load':'_onNoteLoad'},
+        listeners:{'note-load':'_onNoteLoad'},
         properties:{
             name:{
                 type:String
+            },
+            loadingId:{
+                type:Number,
+                value:0
+            },
+            finishedLoading:{
+                type:Boolean,
+                value:false
             },
             rotation:{
                 type:Boolean,
@@ -35,10 +43,6 @@
                 type:Number,
                 value:1,
                 observer:'_setSynthPlaybackVolume'
-            },
-            tone: {
-                type: Number,
-                value: 0
             },
             changingPitch: {
                 type: Boolean,
@@ -68,13 +72,30 @@
             return "vertical" ;
         },
         _loadInstrumentNotes: function( loadFunction ){
+            var d = new Date();
+            var id = d.getTime();
+            this.loadingId = id ;
             this.notesLoaded = 0 ;
+            this.finishedLoading = false ;
             loadFunction.call(this) ;
         },
-        _onNoteLoad: function(){
+        _loadNote: function(synthId,note){
+            this.$$('#'+synthId).loadNote(note,this.loadingId);
+        },
+        _onNoteLoad: function(e){
+            if(e.detail.id!==this.loadingId)
+                return;
             this.notesLoaded ++ ;
-            if(this.notesLoaded===this.instrumentNotes)
-                this.fire('ready') ;
+            if(this.notesLoaded===this.instrumentNotes) {
+                this.finishedLoading = true ;
+                this.fire('notes-loaded') ;
+                this._onFinishedLoadingNotes() ;
+            }
+        },
+        _onFinishedLoadingNotes: function(){
+        },
+        _setPitch: function(){
+
         },
         addPitch: function(diff){
             this._setPitch(diff) ;
