@@ -16,10 +16,6 @@
                 type: Array,
                 value: []
             },
-            instrumentNote: {
-                type: String,
-                value: ""
-            },
             showingInstrumentNotes:{
                 type:Boolean,
                 value:false
@@ -36,10 +32,6 @@
                 type: Array,
                 value: []
             },
-            playBackNote: {
-                type: String,
-                value: ""
-            },
             showingPlaybackNotes:{
                 type:Boolean,
                 value:false
@@ -48,6 +40,26 @@
                 type: Number,
                 value:0
             }
+        },
+        _getNoteName: function(note){
+            var notes = [
+                'C',
+                'C#',
+                'D',
+                'Eb',
+                'E',
+                'F',
+                'F#',
+                'G',
+                'Ab',
+                'A',
+                'Bb',
+                'B'
+            ];
+            var octave = Math.floor(note / 12);
+            var name = notes[note % 12];
+            name += octave;
+            return name;
         },
         update: function () {
             var next;
@@ -79,6 +91,10 @@
             if (e.detail.origin === 'instrument') {
                 this.instrumentEventQueue.unshift(e);
             }
+        },
+        ready: function () {
+            this.playbackEventQueue = [];
+            this.instrumentEventQueue = [];
         }
     } ;
 </script>

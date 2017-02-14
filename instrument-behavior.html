@@ -11,6 +11,10 @@
             'action': '_action'
         },
         properties:{
+            playing:{
+                type:Boolean,
+                value:false
+            },
             rotation: {
                 type: Boolean,
                 value: false
@@ -59,9 +63,11 @@
         },
         // ------------- playback controls --------------
         play: function () {
+            this.playing = true ;
             this.$$('AC-PLAYER').play();
         },
         pause: function () {
+            this.playing = false;
             this.$$('AC-PLAYER').pause();
             this._stopAudio() ;
         },
@@ -72,8 +78,17 @@
             }
         },
         setTempo: function(e){
+            if(this.playing)
+                this.$$('AC-PLAYER').pause() ;
             this._stopAudio() ;
-            this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
+            this.async(function(){
+                this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
+            } , 200 )  ;
+            if(this.playing){
+                this.async(function(){
+                    this.$$('AC-PLAYER').play() ;
+                } , 500 )  ;
+            }
         },
         // ------------- settings controls --------------
         _reportInstruments: function(){
@@ -83,6 +98,9 @@
             }
         },
         addPitch: function (diff) {
+            if(this.playing)
+                this.$$('AC-PLAYER').pause() ;
+            this._stopAudio() ;
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {

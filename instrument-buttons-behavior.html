@@ -7,6 +7,7 @@
 * @polymerBehavior
 */
     InstrumentButtonsBehavior= {
+        listener:{'note-load':'_onNoteLoad'},
         properties:{
             name:{
                 type:String
@@ -43,10 +44,41 @@
                 type: Boolean,
                 value: false
             },
+            notesLoaded:{
+                type:Number,
+                value:0
+            },
+            instrumentNotes:{
+                type:Number,
+                value:0
+            },
             showingNotes:{
                 type:Boolean,
                 value:false
             }
+        },
+        _computeRotation: function(rotation){
+            if( rotation )
+                return "reversedHorizontal" ;
+            return "horizontal" ;
+        },
+        _computeColRotation: function(rotation){
+            if( rotation )
+                return "reversedVertical" ;
+            return "vertical" ;
+        },
+        _loadInstrumentNotes: function( loadFunction ){
+            this.notesLoaded = 0 ;
+            loadFunction.call(this) ;
+        },
+        _onNoteLoad: function(){
+            this.notesLoaded ++ ;
+            if(this.notesLoaded===this.instrumentNotes)
+                this.fire('ready') ;
+        },
+        addPitch: function(diff){
+            this._setPitch(diff) ;
+            this._loadInstrumentNotes(this._loadNotes) ;
         },
         update: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
@@ -85,11 +117,12 @@
         },
         stopAudio: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
-            for (var i = 0; i < nodeList.length; i++) {
+            var i ;
+            for ( i = 0; i < nodeList.length; i++) {
                 nodeList[i].stop() ;
             }
             nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
-            for (var i = 0; i < nodeList.length; i++) {
+            for ( i = 0; i < nodeList.length; i++) {
                 nodeList[i].stop();
             }
         },
