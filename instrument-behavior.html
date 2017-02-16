@@ -12,6 +12,10 @@
             'action': '_action'
         },
         properties:{
+            pitch:{
+                type:Number,
+                value:0
+            },
             finishedLoading:{
                 type:Boolean,
                 value:false
@@ -176,6 +180,7 @@
             Polymer.RenderStatus.afterNextRender(this, function(){
                 this._loop();
                 this._reportInstruments() ;
+                this.addPitch(this.pitch) ;
             }) ;
         }
     } ;
