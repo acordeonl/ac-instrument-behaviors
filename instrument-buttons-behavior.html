@@ -89,10 +89,9 @@
             if(this.notesLoaded===this.instrumentNotes) {
                 this.finishedLoading = true ;
                 this.fire('notes-loaded') ;
-                this._onFinishedLoadingNotes() ;
             }
         },
-        _onFinishedLoadingNotes: function(){
+        onFinishedLoadingNotes: function(){
         },
         _setPitch: function(){
 

@@ -37,6 +37,10 @@
                 flag &= nodeList[i].finishedLoading;
             if(flag){
                 this.finishedLoading = true ;
+                this.async(function(){
+                    for (var j = 0; j < nodeList.length; j++)
+                        nodeList[j].onFinishedLoadingNotes();
+                } , 0 )  ;
                 if(this.playing)
                     this.$$('AC-PLAYER').play() ;
             }
