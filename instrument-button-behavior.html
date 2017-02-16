@@ -82,9 +82,15 @@
                 }
             }
         },
-        stop: function(){
-            this.playbackState = 0 ;
-            this.playbackEventQueue = [] ;
+        stop: function(origin){
+            if(origin==='playback') {
+                this.playbackState = 0 ;
+                this.playbackEventQueue = [] ;
+            }
+            if(origin==='instrument') {
+                this.instrumentState = 0 ;
+                this.instrumentEventQueue = [] ;
+            }
         },
         addButtonAction: function (e) {
             if (e.detail.origin === 'playback')

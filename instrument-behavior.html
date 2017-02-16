@@ -12,6 +12,10 @@
             'action': '_action'
         },
         properties:{
+            finishedLoading:{
+                type:Boolean,
+                value:false
+            },
             playing:{
                 type:Boolean,
                 value:false
@@ -29,15 +33,18 @@
         _onNotesLoaded: function(){
             var flag = true ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-            for (var i = 0; i < nodeList.length; i++) {
+            for (var i = 0; i < nodeList.length; i++)
                 flag &= nodeList[i].finishedLoading;
-            }
-            if(flag && this.playing) {
-                this.$$('AC-PLAYER').play() ;
+            if(flag){
+                this.finishedLoading = true ;
+                if(this.playing)
+                    this.$$('AC-PLAYER').play() ;
             }
         },
         // ------------- midi ---------------------
         _action: function (e) {
+            if(!this.finishedLoading)
+                return  ;
             if (this.recording && e.detail.fromPlayer === undefined && e.detail.channel !== 2)
                 this.$$('AC-RECORDER').addInstrumentActivity(e.detail.cmd, e.detail.midiNote, e.detail.channel);
             if (e.detail.cmd==='velocity-change') {
@@ -81,18 +88,18 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio() ;
+            this._stopAudio('playback') ;
         },
-        _stopAudio: function(){
+        _stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].stopAudio() ;
+                nodeList[i].stopAudio(origin) ;
             }
         },
         setTempo: function(e){
             if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio() ;
+            this._stopAudio('playback') ;
             this.async(function(){
                 this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
             } , 200 )  ;
@@ -112,7 +119,9 @@
         addPitch: function (diff) {
             if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio() ;
+            this._stopAudio('playback') ;
+            this._stopAudio('instrument') ;
+            this.finishedLoading = false ;
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
