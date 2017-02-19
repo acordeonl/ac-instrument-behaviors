@@ -92,7 +92,7 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio('playback') ;
+            this._stopAudio('playbackPlaying') ;
         },
         _stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');

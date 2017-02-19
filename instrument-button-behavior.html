@@ -84,12 +84,18 @@
         },
         stop: function(origin){
             if(origin==='playback') {
-                this.playbackState = 0 ;
                 this.playbackEventQueue = [] ;
+                this.playbackState = 0 ;
             }
             if(origin==='instrument') {
-                this.instrumentState = 0 ;
                 this.instrumentEventQueue = [] ;
+                this.instrumentState = 0 ;
+            }
+            if(origin==='playbackPlaying'){
+                this.async(function(){
+                    this.playbackEventQueue = [] ;
+                } , 10 )  ;
+                // this.playbackState = 0 ;
             }
         },
         addButtonAction: function (e) {
