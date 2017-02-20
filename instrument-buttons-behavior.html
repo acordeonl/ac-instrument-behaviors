@@ -139,7 +139,7 @@
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             var i ;
             for ( i = 0; i < nodeList.length; i++) {
-                if(origin==='playbackPlaying')
+                if(origin==='playbackWithGUI')
                     nodeList[i].stop('playback') ;
                 else
                     nodeList[i].stop(origin) ;

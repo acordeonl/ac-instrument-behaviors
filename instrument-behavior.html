@@ -92,7 +92,7 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio('playbackPlaying') ;
+            this._stopAudio('playbackWithGUI') ;
         },
         _stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
@@ -103,14 +103,14 @@
         setTempo: function(e){
             if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
+            this._stopAudio('playbackWithGUI') ;
             this.async(function(){
                 this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
-            } , 200 )  ;
+            } , 0 )  ;
             if(this.playing){
                 this.async(function(){
                     this.$$('AC-PLAYER').play() ;
-                } , 500 )  ;
+                } , 100 )  ;
             }
         },
         // ------------- settings controls --------------
@@ -121,9 +121,13 @@
             }
         },
         addPitch: function (diff) {
-            if(this.playing)
+            if(this.playing){
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
+                this._stopAudio('playback') ;
+            }
+            else {
+                this._stopAudio('playbackWithGUI') ;
+            }
             this._stopAudio('instrument') ;
             this.finishedLoading = false ;
             noteNotFound = false ;

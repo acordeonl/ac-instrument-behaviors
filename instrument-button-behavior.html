@@ -84,18 +84,17 @@
         },
         stop: function(origin){
             if(origin==='playback') {
-                this.playbackEventQueue = [] ;
                 this.playbackState = 0 ;
+                this.playbackEventQueue = [] ;
             }
             if(origin==='instrument') {
-                this.instrumentEventQueue = [] ;
                 this.instrumentState = 0 ;
+                this.instrumentEventQueue = [] ;
             }
-            if(origin==='playbackPlaying'){
+            if(origin==='playbackWithGUI'){
                 this.async(function(){
                     this.playbackEventQueue = [] ;
                 } , 10 )  ;
-                // this.playbackState = 0 ;
             }
         },
         addButtonAction: function (e) {
