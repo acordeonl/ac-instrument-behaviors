@@ -116,18 +116,18 @@
             this.$$('AC-PLAYER').showCurrentGUIState() ;
         },
         setTempo: function(e){
-            if(this.playing)
-                this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
-            this._resetGUI('playback',false ) ;
+            // if(this.playing)
+            //     this.$$('AC-PLAYER').pause() ;
+            // this._stopAudio('playback') ;
+            // this._resetGUI('playback',false ) ;
             this.async(function(){
                 this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
             } , 0 )  ;
-            if(this.playing){
-                this.async(function(){
-                    this.$$('AC-PLAYER').play() ;
-                } , 100 )  ;
-            }
+            // if(this.playing){
+            //     this.async(function(){
+            //         this.$$('AC-PLAYER').play() ;
+            //     } , 100 )  ;
+            // }
         },
         // ------------- settings controls --------------
         _reportInstruments: function(){
