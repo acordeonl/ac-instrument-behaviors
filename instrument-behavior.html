@@ -92,10 +92,13 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio('playbackWithGUI') ;
+            this._stopAudio('playback') ;
+            this._resetGUI('playback',false ) ;
         },
         setProgress: function(progress){
+            this._resetGUI('playback',true) ;
             this.$$('AC-PLAYER').setProgress(progress);
+            this._showCurrentGUIState() ;
         },
         _stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
@@ -103,10 +106,20 @@
                 nodeList[i].stopAudio(origin) ;
             }
         },
+        _resetGUI: function(origin,clearState){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].resetGUI(origin,clearState) ;
+            }
+        },
+        _showCurrentGUIState: function(){
+            this.$$('AC-PLAYER').showCurrentGUIState() ;
+        },
         setTempo: function(e){
             if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playbackWithGUI') ;
+            this._stopAudio('playback') ;
+            this._resetGUI('playback',false ) ;
             this.async(function(){
                 this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
             } , 0 )  ;
@@ -124,14 +137,12 @@
             }
         },
         addPitch: function (diff) {
-            if(this.playing){
+            if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-                this._stopAudio('playback') ;
-            }
-            else {
-                this._stopAudio('playbackWithGUI') ;
-            }
+            this._stopAudio('playback') ;
             this._stopAudio('instrument') ;
+            this._resetGUI('playback',false ) ;
+            this._resetGUI('instrument',true ) ;
             this.finishedLoading = false ;
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');

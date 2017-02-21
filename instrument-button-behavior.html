@@ -82,23 +82,24 @@
                 }
             }
         },
-        stop: function(origin){
+        resetGUI: function(origin,clearState){
             if(origin==='playback') {
-                this.playbackState = 0 ;
-                this.playbackEventQueue = [] ;
+                // this.async(function(){
+                    this.playbackEventQueue = [] ;
+                    if(clearState)
+                        this.playbackState = 0 ;
+                // }.bind(clearState) , 0 )  ;
             }
             if(origin==='instrument') {
-                this.instrumentState = 0 ;
-                this.instrumentEventQueue = [] ;
-            }
-            if(origin==='playbackWithGUI'){
-                this.async(function(){
-                    this.playbackEventQueue = [] ;
-                } , 10 )  ;
+                // this.async(function(){
+                    this.instrumentEventQueue = [] ;
+                    if(clearState)
+                        this.instrumentState = 0 ;
+                // }.bind(clearState) , 0 )  ;
             }
         },
         addButtonAction: function (e) {
-            if (e.detail.origin === 'playback')
+            if (e.detail.origin === 'playback' || e.detail.origin==='playbackGUI')
                 this.playbackEventQueue.unshift(e);
             if (e.detail.origin === 'instrument') {
                 this.instrumentEventQueue.unshift(e);

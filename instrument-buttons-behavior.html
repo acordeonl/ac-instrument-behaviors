@@ -138,15 +138,13 @@
         stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             var i ;
+            for ( i = 0; i < nodeList.length; i++)
+                nodeList[i].stop(origin) ;
+        },
+        resetGUI: function(origin,clearState){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for ( i = 0; i < nodeList.length; i++) {
-                if(origin==='playbackWithGUI')
-                    nodeList[i].stop('playback') ;
-                else
-                    nodeList[i].stop(origin) ;
-            }
-            nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
-            for ( i = 0; i < nodeList.length; i++) {
-                nodeList[i].stop(origin);
+                nodeList[i].resetGUI(origin,clearState);
             }
         },
         _setSynthInstrumentPanning: function(panning){
