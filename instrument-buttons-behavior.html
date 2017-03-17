@@ -72,12 +72,14 @@
             return "vertical" ;
         },
         _loadInstrumentNotes: function( loadFunction ){
+            this.async(function(){
+                loadFunction.call(this) ;
+            } , 0 )  ;
             var d = new Date();
             var id = d.getTime();
             this.loadingId = id ;
             this.notesLoaded = 0 ;
             this.finishedLoading = false ;
-            loadFunction.call(this) ;
         },
         _loadNote: function(synthId,note){
             this.$$('#'+synthId).loadNote(note,this.loadingId);
@@ -97,8 +99,12 @@
 
         },
         addPitch: function(diff){
-            this._setPitch(diff) ;
-            this._loadInstrumentNotes(this._loadNotes) ;
+            this.async(function(){
+                this._setPitch(diff) ;
+            } , 5 )  ;
+            this.async(function(){
+                this._loadInstrumentNotes(this._loadNotes) ;
+            } , 0 )  ;
         },
         update: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
