@@ -7,8 +7,15 @@
 * @polymerBehavior
 */
     InstrumentButtonsBehavior= {
-        listeners:{'note-load':'_onNoteLoad'},
         properties:{
+            playbackButtonActions:{
+                type:Array,
+                value:[]
+            },
+            instrumentButtonActions:{
+                type:Array,
+                value:[]
+            },
             name:{
                 type:String
             },
@@ -53,13 +60,47 @@
                 value:0
             },
             instrumentNotes:{
-                type:Number,
-                value:0
+                type:Number
             },
             showingNotes:{
                 type:Boolean,
                 value:false
             }
+        },
+        addGUIAction: function(e){
+            if (e.detail.origin === 'playback' || e.detail.origin==='playbackGUI') {
+                this.playbackButtonActions.unshift(e);
+            }
+            if (e.detail.origin === 'instrument') {
+                this.instrumentButtonActions.unshift(e);
+            }
+        },
+        updateGUI: function(){
+            requestAnimationFrame(this.updateGUI.bind(this)) ;
+            var e  ;
+            if(this.playbackButtonActions.length > 0 ) {
+                e = this.playbackButtonActions[this.playbackButtonActions.length-1] ;
+                var when ;
+                if(e.detail.playNow !== undefined) {
+                    when = context.currentTime ;
+                }
+                else{
+                    var playBackTime = e.detail.playedTime + (context.currentTime-e.detail.playTime)/(e.detail.tempo) ;
+                    when =  context.currentTime+(e.detail.tempo)*(e.detail.time-playBackTime)  ;
+                }
+                if(when < context.currentTime || e.detail.playNow !== undefined){
+                    this.$$('['+e.detail.which+']').render(e.detail.origin,e.detail.buttonState) ;
+                    this.playbackButtonActions.pop() ;
+                }
+            }
+            if(this.instrumentButtonActions.length > 0 ){
+                e = this.instrumentButtonActions[this.instrumentButtonActions.length-1] ;
+                if(e.detail.guiWhen < context.currentTime){
+                    this.$$('['+e.detail.which+']').render(e.detail.origin,e.detail.buttonState) ;
+                    this.instrumentButtonActions.pop() ;
+                }
+            }
+            e = null ;
         },
         _computeRotation: function(rotation){
             if( rotation )
@@ -72,45 +113,26 @@
             return "vertical" ;
         },
         _loadInstrumentNotes: function( loadFunction ){
-            this.async(function(){
-                loadFunction.call(this) ;
-            } , 0 )  ;
             var d = new Date();
             var id = d.getTime();
             this.loadingId = id ;
             this.notesLoaded = 0 ;
             this.finishedLoading = false ;
+            loadFunction.call(this) ;
+
         },
         _loadNote: function(synthId,note){
             this.$$('#'+synthId).loadNote(note,this.loadingId);
         },
-        _onNoteLoad: function(e){
-            if(e.detail.id!==this.loadingId)
-                return;
-            this.notesLoaded ++ ;
-            if(this.notesLoaded===this.instrumentNotes) {
-                this.finishedLoading = true ;
-                this.fire('notes-loaded') ;
-            }
-        },
         onFinishedLoadingNotes: function(){
         },
-        _setPitch: function(){
-
-        },
         addPitch: function(diff){
-            this.async(function(){
-                this._setPitch(diff) ;
-            } , 5 )  ;
-            this.async(function(){
-                this._loadInstrumentNotes(this._loadNotes) ;
-            } , 0 )  ;
-        },
-        update: function(){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].update() ;
-            }
+            // this.async(function(){
+            this._setPitch(diff) ;
+            // } , 5 )  ;
+            // this.async(function(){
+            this._loadInstrumentNotes(this._loadNotes) ;
+            // } , 0 )  ;
         },
         reportInstrument: function(){
             this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
@@ -152,6 +174,8 @@
             for ( i = 0; i < nodeList.length; i++) {
                 nodeList[i].resetGUI(origin,clearState);
             }
+            this.playbackButtonActions = [] ;
+            this.instrumentButtonActions = [] ;
         },
         _setSynthInstrumentPanning: function(panning){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
@@ -176,6 +200,11 @@
             for (var i = 0; i < nodeList.length; i++) {
                 nodeList[i].setInstrumentGain(volume) ;
             }
+        },
+        ready: function () {
+            this.playbackButtonActions = []  ;
+            this.instrumentButtonActions = []  ;
+            this.updateGUI() ;
         }
     } ;
 </script>

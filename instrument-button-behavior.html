@@ -12,10 +12,6 @@
                 type:Number,
                 value:1
             },
-            instrumentEventQueue: {
-                type: Array,
-                value: []
-            },
             showingInstrumentNotes:{
                 type:Boolean,
                 value:false
@@ -27,10 +23,6 @@
             playbackOpacity:{
                 type:Number,
                 value:1
-            },
-            playbackEventQueue: {
-                type: Array,
-                value: []
             },
             showingPlaybackNotes:{
                 type:Boolean,
@@ -61,53 +53,19 @@
             name += octave;
             return name;
         },
-        update: function () {
-            var next;
-            while (this.playbackEventQueue.length > 0) {
-                next = this.playbackEventQueue[this.playbackEventQueue.length - 1];
-                if (next.detail.time < context.currentTime) {
-                    this.playbackState = next.detail.buttonState;
-                    this.playbackEventQueue.pop();
-                } else {
-                    break;
-                }
+        render: function(origin,buttonState){
+            if(origin === 'playback' || origin === 'playbackGUI' && this.playbackState !== buttonState){
+                this.playbackState = buttonState ;
             }
-            while (this.instrumentEventQueue.length > 0) {
-                next = this.instrumentEventQueue[this.instrumentEventQueue.length - 1];
-                if (next.detail.time < context.currentTime) {
-                    this.instrumentState = next.detail.buttonState;
-                    this.instrumentEventQueue.pop();
-                } else {
-                    break;
-                }
-            }
+            if(origin === 'instrument' && this.instrumentState !== buttonState)
+                this.instrumentState = buttonState ;
         },
         resetGUI: function(origin,clearState){
-            if(origin==='playback') {
-                // this.async(function(){
-                    this.playbackEventQueue = [] ;
-                    if(clearState)
-                        this.playbackState = 0 ;
-                // }.bind(clearState) , 0 )  ;
+            if(origin==='playback' && clearState ) {
+                this.playbackState = 0 ;
             }
-            if(origin==='instrument') {
-                // this.async(function(){
-                    this.instrumentEventQueue = [] ;
-                    if(clearState)
-                        this.instrumentState = 0 ;
-                // }.bind(clearState) , 0 )  ;
-            }
-        },
-        addButtonAction: function (e) {
-            if (e.detail.origin === 'playback' || e.detail.origin==='playbackGUI')
-                this.playbackEventQueue.unshift(e);
-            if (e.detail.origin === 'instrument') {
-                this.instrumentEventQueue.unshift(e);
-            }
-        },
-        ready: function () {
-            this.playbackEventQueue = [];
-            this.instrumentEventQueue = [];
+            if(origin==='instrument' && clearState)
+                this.instrumentState = 0 ;
         }
     } ;
 </script>
