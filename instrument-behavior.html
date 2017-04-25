@@ -28,6 +28,10 @@
                 type:Boolean,
                 value:false
             },
+            wasPlaying:{
+                type:Boolean,
+                value:false
+            },
             rotation: {
                 type: Boolean,
                 value: false
@@ -57,10 +61,8 @@
                 flag &= nodeList[i].finishedLoading;
             if(flag){
                 this.finishedLoading = true ;
-                this.async(function(){
-                    for (var j = 0; j < nodeList.length; j++)
+                for (var j = 0; j < nodeList.length; j++)
                         nodeList[j].onFinishedLoadingNotes();
-                } , 0 )  ;
                 if(this.playing)
                     this.$$('AC-PLAYER').play() ;
             }
@@ -110,11 +112,12 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio('playback') ;
             this._resetGUI('playback',false ) ;
+            stopAudio().then(function(){
+                this._stopAudio('playback') ;
+            }.bind(this)) ;
         },
         setProgress: function(progress){
-            this._stopAudio('playback') ;
             this._resetGUI('playback',true) ;
             this.$$('AC-PLAYER').setProgress(progress);
             this._showCurrentGUIState() ;
@@ -137,16 +140,8 @@
             this.$$('AC-PLAYER').showCurrentGUIState() ;
         },
         setTempo: function(e){
-            if(this.playing)
-                this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
             this._resetGUI('playback',true) ;
             this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
-            if(this.playing){
-                this.async(function(){
-                    this.$$('AC-PLAYER').play() ;
-                } , 400 )  ;
-            }
         },
         // ------------- settings controls --------------
         _reportInstruments: function(){
@@ -156,10 +151,15 @@
             }
         },
         addPitch: function (diff) {
-            if(this.playing)
+            this.wasPlaying = false ;
+            if(this.playing) {
+                this.wasPlaying = true ;
                 this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
-            this._stopAudio('instrument') ;
+            }
+            stopAudio().then(function(){
+                this._stopAudio('playback') ;
+                this._stopAudio('instrument') ;
+            }) ;
             this._resetGUI('playback',false ) ;
             this._resetGUI('instrument',true ) ;
             this.finishedLoading = false ;
@@ -167,6 +167,11 @@
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
                 nodeList[i].addPitch(diff) ;
+            }
+            if (this.wasPlaying) {
+                this.async(function(){
+                    this.$$('AC-PLAYER').play() ;
+                } , 300 )  ;
             }
         },
         toggleNotes: function (which,value) {
