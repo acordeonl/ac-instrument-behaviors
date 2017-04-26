@@ -28,10 +28,6 @@
                 type:Boolean,
                 value:false
             },
-            wasPlaying:{
-                type:Boolean,
-                value:false
-            },
             rotation: {
                 type: Boolean,
                 value: false
@@ -61,16 +57,16 @@
                 flag &= nodeList[i].finishedLoading;
             if(flag){
                 this.finishedLoading = true ;
-                for (var j = 0; j < nodeList.length; j++)
+                this.async(function(){
+                    for (var j = 0; j < nodeList.length; j++)
                         nodeList[j].onFinishedLoadingNotes();
+                } , 0 )  ;
                 if(this.playing)
                     this.$$('AC-PLAYER').play() ;
             }
         },
         // ------------- midi ---------------------
         _action: function (e) {
-            // e.stopPropagation() ;
-            // e.preventDefault() ;
             if(!this.finishedLoading)
                 return  ;
             if (this.recording && e.detail.fromPlayer === undefined && e.detail.channel !== 2)
@@ -112,10 +108,8 @@
         pause: function () {
             this.playing = false;
             this.$$('AC-PLAYER').pause();
+            this._stopAudio('playback') ;
             this._resetGUI('playback',false ) ;
-            stopAudio().then(function(){
-                this._stopAudio('playback') ;
-            }.bind(this)) ;
         },
         setProgress: function(progress){
             this._resetGUI('playback',true) ;
@@ -123,8 +117,6 @@
             this._showCurrentGUIState() ;
         },
         _stopAudio: function(origin){
-            context.close() ;
-            initAudioContext() ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
                 nodeList[i].stopAudio(origin) ;
@@ -140,7 +132,6 @@
             this.$$('AC-PLAYER').showCurrentGUIState() ;
         },
         setTempo: function(e){
-            this._resetGUI('playback',true) ;
             this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
         },
         // ------------- settings controls --------------
@@ -151,15 +142,10 @@
             }
         },
         addPitch: function (diff) {
-            this.wasPlaying = false ;
-            if(this.playing) {
-                this.wasPlaying = true ;
+            if(this.playing)
                 this.$$('AC-PLAYER').pause() ;
-            }
-            stopAudio().then(function(){
-                this._stopAudio('playback') ;
-                this._stopAudio('instrument') ;
-            }) ;
+            this._stopAudio('playback') ;
+            this._stopAudio('instrument') ;
             this._resetGUI('playback',false ) ;
             this._resetGUI('instrument',true ) ;
             this.finishedLoading = false ;
@@ -167,11 +153,6 @@
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
                 nodeList[i].addPitch(diff) ;
-            }
-            if (this.wasPlaying) {
-                this.async(function(){
-                    this.$$('AC-PLAYER').play() ;
-                } , 300 )  ;
             }
         },
         toggleNotes: function (which,value) {

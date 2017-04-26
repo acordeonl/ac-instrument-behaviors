@@ -68,17 +68,15 @@
             }
         },
         addGUIAction: function(e){
-            // if (e.detail.origin === 'playback' || e.detail.origin==='playbackGUI') {
-            //     this.playbackButtonActions.unshift(e);
-            // }
-            // if (e.detail.origin === 'instrument') {
-            //     this.instrumentButtonActions.unshift(e);
-            // }
+            if (e.detail.origin === 'playback' || e.detail.origin==='playbackGUI') {
+                this.playbackButtonActions.unshift(e);
+            }
+            if (e.detail.origin === 'instrument') {
+                this.instrumentButtonActions.unshift(e);
+            }
         },
         updateGUI: function(){
-            // setTimeout(this.updateGUI.bind(this),30) ;
-            // requestAnimationFrame(this.updateGUI.bind(this)) ;
-            // return ;
+            requestAnimationFrame(this.updateGUI.bind(this)) ;
             var e  ;
             if(this.playbackButtonActions.length > 0 ) {
                 e = this.playbackButtonActions[this.playbackButtonActions.length-1] ;
@@ -176,8 +174,8 @@
             for ( i = 0; i < nodeList.length; i++) {
                 nodeList[i].resetGUI(origin,clearState);
             }
-            // this.playbackButtonActions = [] ;
-            // this.instrumentButtonActions = [] ;
+            this.playbackButtonActions = [] ;
+            this.instrumentButtonActions = [] ;
         },
         _setSynthInstrumentPanning: function(panning){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
@@ -206,8 +204,7 @@
         ready: function () {
             this.playbackButtonActions = []  ;
             this.instrumentButtonActions = []  ;
-            // setInterval(this.updateGUI.bind(this),16) ;
-            // this.updateGUI() ;
+            this.updateGUI() ;
         }
     } ;
 </script>
