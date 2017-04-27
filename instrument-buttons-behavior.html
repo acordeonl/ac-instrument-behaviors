@@ -127,12 +127,8 @@
         onFinishedLoadingNotes: function(){
         },
         addPitch: function(diff){
-            // this.async(function(){
             this._setPitch(diff) ;
-            // } , 5 )  ;
-            // this.async(function(){
             this._loadInstrumentNotes(this._loadNotes) ;
-            // } , 0 )  ;
         },
         reportInstrument: function(){
             this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
