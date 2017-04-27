@@ -109,7 +109,8 @@
             this.playing = false;
             this.$$('AC-PLAYER').pause();
             this._stopAudio('playback') ;
-            this._resetGUI('playback',false ) ;
+            this._resetGUI('playback',true ) ;
+            this._showCurrentGUIState() ;
         },
         setProgress: function(progress){
             this._resetGUI('playback',true) ;
