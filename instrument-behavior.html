@@ -9,7 +9,7 @@
     InstrumentBehavior= {
         listeners:{
             'notes-loaded':'_instrumentLoaded',
-            'action': '_action'
+            'action': 'action'
         },
         properties:{
             synthesizersLoaded:{
@@ -21,10 +21,6 @@
                 value:false
             },
             finishedLoading:{
-                type:Boolean,
-                value:false
-            },
-            playing:{
                 type:Boolean,
                 value:false
             },
@@ -61,18 +57,18 @@
                     for (var j = 0; j < nodeList.length; j++)
                         nodeList[j].onFinishedLoadingNotes();
                 } , 0 )  ;
-                if(this.playing)
+                if(playing)
                     this.$$('AC-PLAYER').play() ;
             }
         },
         // ------------- midi ---------------------
-        _action: function (e) {
+        action: function (e) {
             if(!this.finishedLoading)
                 return  ;
-            if (this.recording && e.detail.fromPlayer === undefined && e.detail.channel !== 2)
-                this.$$('AC-RECORDER').addInstrumentActivity(e.detail.cmd, e.detail.button, e.detail.channel);
-            if (e.detail.cmd==='velocity-change') {
-                this._setVelocity (e.detail.velocity) ;
+            if (this.recording && e.fromPlayer === undefined && e.channel !== 2)
+                this.$$('AC-RECORDER').addInstrumentActivity(e.cmd, e.button, e.channel);
+            if (e.cmd==='velocity-change') {
+                this._setVelocity (e.velocity) ;
             }
             this._instrumentAction(e) ;
         },
@@ -102,19 +98,29 @@
         },
         // ------------- playback controls --------------
         play: function () {
-            this.playing = true ;
             this.$$('AC-PLAYER').play();
         },
         pause: function () {
-            this.playing = false;
             this.$$('AC-PLAYER').pause();
-            this._stopAudio('playback') ;
-            this._resetGUI('playback',true ) ;
-            this._showCurrentGUIState() ;
+            this._resetGUI('playback', false ) ;
+            stopAudio().then(function(){
+                context.close() ;
+                initAudioContext() ;
+                this._stopAudio('playback') ;
+            }.bind(this)) ;
+        },
+        stop: function () {
+            this.$$('AC-PLAYER').pause();
+            stopAudio().then(function(){
+                context.close() ;
+                initAudioContext() ;
+                this._stopAudio('playback') ;
+                this._resetGUI('playback', true ) ;
+            }.bind(this)) ;
         },
         setProgress: function(progress){
-            this._resetGUI('playback',true) ;
             this.$$('AC-PLAYER').setProgress(progress);
+            this._resetGUI('playback',true) ;
             this._showCurrentGUIState() ;
         },
         _stopAudio: function(origin){
@@ -143,12 +149,10 @@
             }
         },
         addPitch: function (diff) {
-            if(this.playing)
-                this.$$('AC-PLAYER').pause() ;
-            this._stopAudio('playback') ;
-            this._stopAudio('instrument') ;
-            this._resetGUI('playback',false ) ;
-            this._resetGUI('instrument',true ) ;
+            if(playing)
+                this.pause() ;
+            // this._stopAudio('instrument') ;
+            // this._resetGUI('instrument',true ) ;
             this.finishedLoading = false ;
             noteNotFound = false ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
