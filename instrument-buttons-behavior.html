@@ -11,11 +11,7 @@
             name:{
                 type:String
             },
-            registeredInstrumentButtons:{
-                type:Boolean,
-                value:false
-            },
-            synthesizers:{
+            totalSynthesizers:{
                 type:Number,
                 value:0
             },
@@ -56,31 +52,37 @@
                 type:Number,
                 value:1,
                 observer:'_setSynthPlaybackVolume'
-            },
-            changingPitch: {
-                type: Boolean,
-                value: false
-            },
-            instrumentNotes:{
-                type:Number
-            },
-            showingNotes:{
-                type:Boolean,
-                value:false
             }
         },
+        // -------------- INSTRUMENT LOADING --------------------
         _onLoadSynthesizer: function(){
             this.loadedSynthesizers ++ ;
-            if(this.loadedSynthesizers === this.synthesizers) {
-                if (!this.registeredInstrumentButtons) {
-                    this.registeredInstrumentButtons = true ;
-                    this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
-                }
-                else{
-                    this.fire('instrument-buttons-loaded-2') ;
-                }
+            if(this.loadedSynthesizers === this.totalSynthesizers) {
+                this.fire('instrument-buttons-loaded-2') ;
             }
         },
+        registerInstrumentButtons: function(){
+            this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
+        },
+        onFinishedLoadingNotes: function(){
+        },
+        // ----------------  PITCH -------------------------
+        addPitch: function(diff){
+            this.loadedSynthesizers = 0  ;
+            this._addPitch(diff) ;
+            this._loadInstrumentButtonsNotes(this._loadNotes) ;
+        },
+        _loadInstrumentButtonsNotes: function( loadFunction ){
+            this.finishedLoading = false ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++)
+                nodeList[i].onPitchUpdate()  ;
+            loadFunction.call(this) ;
+        },
+        _loadNote: function(synthId,note){
+            this.$$('#'+synthId).loadNote(note);
+        },
+        // -------------------- GUI -------------------------
         addGUIAction: function(e){
             if (e.origin === 'playback' || e.origin==='playbackGUI') {
                 this.playbackButtonActions.push(e);
@@ -111,33 +113,6 @@
                 }
             }
         },
-        _computeRotation: function(rotation){
-            if( rotation )
-                return "reversedHorizontal" ;
-            return "horizontal" ;
-        },
-        _computeColRotation: function(rotation){
-            if( rotation )
-                return "reversedVertical" ;
-            return "vertical" ;
-        },
-        _loadInstrumentButtonsNotes: function( loadFunction ){
-            this.finishedLoading = false ;
-            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
-            for (var i = 0; i < nodeList.length; i++)
-                nodeList[i].onPitchUpdate()  ;
-            loadFunction.call(this) ;
-        },
-        _loadNote: function(synthId,note){
-            this.$$('#'+synthId).loadNote(note);
-        },
-        onFinishedLoadingNotes: function(){
-        },
-        addPitch: function(diff){
-            this.loadedSynthesizers = 0  ;
-            this._addPitch(diff) ;
-            this._loadInstrumentButtonsNotes(this._loadNotes) ;
-        },
         toggleNotesOnButtons: function(which,value){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
@@ -149,6 +124,16 @@
                 }
             }
         },
+        _computeRotation: function(rotation){
+            if( rotation )
+                return "reversedHorizontal" ;
+            return "horizontal" ;
+        },
+        _computeColRotation: function(rotation){
+            if( rotation )
+                return "reversedVertical" ;
+            return "vertical" ;
+        },
         setOpacity: function(which,opacity){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
             for (var i = 0; i < nodeList.length; i++) {
@@ -157,18 +142,6 @@
                 if (which ==='instrument')
                     nodeList[i].instrumentOpacity = opacity ;
             }
-        },
-        setVelocity: function(velocity){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].setVelocity(velocity) ;
-            }
-        },
-        stopAudio: function(origin){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
-            var i ;
-            for ( i = 0; i < nodeList.length; i++)
-                nodeList[i].stop(origin) ;
         },
         resetGUI: function(origin,clearState){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
@@ -195,6 +168,19 @@
             this.playbackButtonActions.clear() ;
             this.instrumentButtonActions.clear() ;
         },
+        // ----------------- SYNTHESIZER  --------------------------
+        stopAudio: function(origin){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            var i ;
+            for ( i = 0; i < nodeList.length; i++)
+                nodeList[i].stop(origin) ;
+        },
+        setVelocity: function(velocity){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].setVelocity(velocity) ;
+            }
+        },
         _setSynthInstrumentPanning: function(panning){
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++) {
@@ -219,10 +205,11 @@
                 nodeList[i].setInstrumentGain(volume) ;
             }
         },
+        
         ready: function () {
             this.playbackButtonActions = new LinkedList()  ;
             this.instrumentButtonActions = new LinkedList() ;
-            this.synthesizers = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER').length;
+            this.totalSynthesizers = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER').length;
             this.loadedSynthesizers = 0 ;
             this.listen(this,'synthesizer-load','_onLoadSynthesizer') ;
             setInterval(this.updateGUI.bind(this),5) ;
