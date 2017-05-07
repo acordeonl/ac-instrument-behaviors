@@ -11,6 +11,14 @@
             name:{
                 type:String
             },
+            synthesizers:{
+                type:Number,
+                value:0
+            },
+            loadedSynthesizers:{
+                type:Number,
+                value:0
+            },
             playbackButtonActions:{
                 type:Object
             },
@@ -65,6 +73,14 @@
                 value:false
             }
         },
+        _onLoadSynthesizer: function(){
+            this.loadedSynthesizers ++ ;
+            if(this.loadedSynthesizers === this.synthesizers) {
+                this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
+            }
+        },
+        registerInstrument: function(){
+        },
         addGUIAction: function(e){
             if (e.origin === 'playback' || e.origin==='playbackGUI') {
                 this.playbackButtonActions.push(e);
@@ -74,7 +90,6 @@
             }
         },
         updateGUI: function(){
-            // requestAnimationFrame(this.updateGUI.bind(this)) ;
             if(this.playbackButtonActions.length > 0 ) {
                 var when ;
                 if(this.playbackButtonActions.first.value.playNow !== undefined) {
@@ -113,7 +128,6 @@
             this.notesLoaded = 0 ;
             this.finishedLoading = false ;
             loadFunction.call(this) ;
-
         },
         _loadNote: function(synthId,note){
             this.$$('#'+synthId).loadNote(note,this.loadingId);
@@ -123,9 +137,6 @@
         addPitch: function(diff){
             this._setPitch(diff) ;
             this._loadInstrumentNotes(this._loadNotes) ;
-        },
-        reportInstrument: function(){
-            this.fire('update-instrument',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
         },
         toggleNotesOnButtons: function(which,value){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
@@ -143,7 +154,7 @@
             for (var i = 0; i < nodeList.length; i++) {
                 if (which==='playback')
                     nodeList[i].playbackOpacity = opacity ;
-                else
+                if (which ==='instrument')
                     nodeList[i].instrumentOpacity = opacity ;
             }
         },
@@ -211,8 +222,10 @@
         ready: function () {
             this.playbackButtonActions = new LinkedList()  ;
             this.instrumentButtonActions = new LinkedList() ;
-            // this.updateGUI() ;
             setInterval(this.updateGUI.bind(this),5) ;
+            this.loadedSynthesizers = 0 ;
+            this.listen(this,'synthesizer-load','_onLoadSynthesizer') ;
+            this.synthesizers = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER').length;
         }
     } ;
 </script>

@@ -8,11 +8,15 @@
 */
     InstrumentBehavior= {
         listeners:{
-            'notes-loaded':'_instrumentLoaded',
-            'action': 'action'
+            'action': 'action',
+            'instrument-buttons-loaded':'_onInstrumentButtonsLoaded'
         },
         properties:{
-            synthesizersLoaded:{
+            instrumentButtons:{
+                type:Number,
+                value:0
+            },
+            loadedButtons:{
                 type:Number,
                 value:0
             },
@@ -28,37 +32,71 @@
                 type: Boolean,
                 value: false
             },
+            reportedInstruments:{
+                type:Boolean,
+                value:false
+            },
             recording: {
                 type: Boolean,
                 value: false
             }
         },
-        // ------------- instrument loading ---------------------
-        _instrumentLoaded: function(){
-            if(this.synthesizersLoaded===undefined)
-                this.synthesizersLoaded = 0 ;
-            this.synthesizersLoaded++ ;
-            if(this.isReady === undefined || this.isReady === false)
-                return ;
-            if (this.synthesizersLoaded === this.synthesizers) {
+        _onInstrumentButtonsLoaded: function(){
+            this.loadedInstrumentButtons ++ ;
+            if(this.loadedInstrumentButtons === this.instrumentButtons) {
+                this.fire('instrument-loaded') ;
                 this.finishedLoading = true ;
-                this._reportInstruments() ;
                 this._onFinishedLoadingNotes() ;
             }
         },
-        _onNotesLoaded: function(){
-            var flag = true ;
+        settingsUpdate: function(e){
+            var target = e.detail.target , value = e.detail.value ;
+            var arr = target.split('_') ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-            for (var i = 0; i < nodeList.length; i++)
-                flag &= nodeList[i].finishedLoading;
-            if(flag){
-                this.finishedLoading = true ;
-                this.async(function(){
-                    for (var j = 0; j < nodeList.length; j++)
-                        nodeList[j].onFinishedLoadingNotes();
-                } , 0 )  ;
-                if(playing)
-                    this.$$('AC-PLAYER').play() ;
+            console.log(target,value);
+            if (arr.length ===3) {
+                if(arr[0] === 'playback') {
+                    if(arr[1] === 'volume')
+                        nodeList[arr[2]].playbackVolume = value/100 ;
+                    if(arr[1] === 'panning') {
+                        nodeList[arr[2]].playbackPanning = value/100 ;
+                    }
+                }
+                if(arr[0] === 'instrument'){
+                    if(arr[1] === 'volume')
+                        nodeList[arr[2]].instrumentVolume = value/100 ;
+                    if(arr[1] == 'panning')
+                        nodeList[arr[2]].instrumentPanning = value/100 ;
+                }
+            }
+            else if (arr.length === 2){
+                if(arr[1] === 'opacity')
+                    this.setOpacity(arr[0],value) ;
+            }
+            else{
+                if(arr[0] === 'reverbSlider'){
+                    this.setReverb(value) ;
+                }
+            }
+        },
+        // ------------- instrument loading ---------------------
+        _onLoadSynthesizer: function(){
+            if(this.synthesizersLoaded===undefined || this.synthesizersLoaded !== this.synthesizers) {
+                if(this.synthesizersLoaded===undefined)
+                    this.synthesizersLoaded = 0 ;
+                this.synthesizersLoaded++ ;
+                if(this.isReady === undefined || this.isReady === false)
+                    return ;
+                if (this.synthesizersLoaded === this.synthesizers) {
+                    this.synthesizersLoaded = 0 ;
+                    this.finishedLoading = true ;
+                    if (!this.reportedInstruments) {
+                        this.reportedInstruments = true ;
+                        this._registerInstrument() ;
+                    }
+                    this.fire('finished-loading-notes') ;
+                    this._onFinishedLoadingNotes() ;
+                }
             }
         },
         // ------------- midi ---------------------
@@ -79,14 +117,6 @@
                 nodeList[i].setVelocity(velocity/127) ;
             }
         },
-        // ------------- GUI update ---------------------
-        update: function(){
-            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].update() ;
-            }
-            this.$$('AC-PLAYER').scheduleNotes();
-        },
         // ------------- recording controls -------------
         startRecording: function () {
             this.recording = true;
@@ -97,11 +127,7 @@
             this.$$('AC-RECORDER').saveRecording();
         },
         // ------------- playback controls --------------
-        play: function () {
-            this.$$('AC-PLAYER').play();
-        },
         pause: function () {
-            this.$$('AC-PLAYER').pause();
             this.resetGUI('playback', false ) ;
             stopAudio().then(function(){
                 context.close() ;
@@ -110,18 +136,12 @@
             }.bind(this)) ;
         },
         stop: function (clearState) {
-            this.$$('AC-PLAYER').pause();
             this.resetGUI('playback', clearState ) ;
             stopAudio().then(function(){
                 context.close() ;
                 initAudioContext() ;
                 this._stopAudio('playback') ;
             }.bind(this)) ;
-        },
-        setProgress: function(progress){
-            this.$$('AC-PLAYER').setProgress(progress);
-            this.resetGUI('playback', true ) ;
-            this.$$('AC-PLAYER').showCurrentGUIState() ;
         },
         _stopAudio: function(origin){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
@@ -135,27 +155,26 @@
                 nodeList[i].resetGUI(origin,clearState) ;
             }
         },
-        setTempo: function(e){
-            this.$$('AC-PLAYER').setTempo(e.detail.tempo) ;
-        },
         // ------------- settings controls --------------
-        _reportInstruments: function(){
+        _registerInstrument: function(){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
             for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].reportInstrument() ;
+                nodeList[i].registerInstrument() ;
             }
         },
         addPitch: function (diff) {
-            if(playing)
-                this.pause() ;
-            // this._stopAudio('instrument') ;
-            // this.resetGUI('instrument',true ) ;
-            this.finishedLoading = false ;
-            noteNotFound = false ;
-            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-            for (var i = 0; i < nodeList.length; i++) {
-                nodeList[i].addPitch(diff) ;
-            }
+            stopAudio().then(function(){
+                context.close() ;
+                initAudioContext() ;
+                this._stopAudio('playback') ;
+
+                this.finishedLoading = false ;
+                noteNotFound = false ;
+                var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+                for (var i = 0; i < nodeList.length; i++) {
+                    nodeList[i].addPitch(diff) ;
+                }
+            }.bind(this)) ;
         },
         toggleNotes: function (which,value) {
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
@@ -199,9 +218,9 @@
         },
         ready: function () {
             this.isReady = true ;
-            if (this.synthesizersLoaded === this.synthesizers) {
-                this._reportInstruments() ;
-            }
+            this.reportedInstruments = false ;
+            this.loadedInstrumentButtons = 0 ;
+            this.instrumentButtons = Polymer.dom(this.root).querySelectorAll('[buttons]').length;
         }
     } ;
 </script>
