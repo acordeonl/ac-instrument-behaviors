@@ -9,7 +9,8 @@
     InstrumentBehavior= {
         listeners:{
             'action': 'action',
-            'instrument-buttons-loaded':'_onInstrumentButtonsLoaded'
+            'instrument-buttons-loaded':'_onInstrumentButtonsLoaded',
+            'instrument-buttons-loaded-2':'_onInstrumentButtonsLoaded'
         },
         properties:{
             instrumentButtons:{
@@ -163,18 +164,12 @@
             }
         },
         addPitch: function (diff) {
-            stopAudio().then(function(){
-                context.close() ;
-                initAudioContext() ;
-                this._stopAudio('playback') ;
-
-                this.finishedLoading = false ;
-                noteNotFound = false ;
-                var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-                for (var i = 0; i < nodeList.length; i++) {
-                    nodeList[i].addPitch(diff) ;
-                }
-            }.bind(this)) ;
+            this.loadedInstrumentButtons = 0 ;
+            this.finishedLoading = false ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            for (var i = 0; i < nodeList.length; i++) {
+                nodeList[i].addPitch(diff) ;
+            }
         },
         toggleNotes: function (which,value) {
             var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');

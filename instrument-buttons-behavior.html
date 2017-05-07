@@ -11,6 +11,10 @@
             name:{
                 type:String
             },
+            registeredInstrumentButtons:{
+                type:Boolean,
+                value:false
+            },
             synthesizers:{
                 type:Number,
                 value:0
@@ -24,10 +28,6 @@
             },
             instrumentButtonActions:{
                 type:Object
-            },
-            loadingId:{
-                type:Number,
-                value:0
             },
             finishedLoading:{
                 type:Boolean,
@@ -61,10 +61,6 @@
                 type: Boolean,
                 value: false
             },
-            notesLoaded:{
-                type:Number,
-                value:0
-            },
             instrumentNotes:{
                 type:Number
             },
@@ -76,10 +72,14 @@
         _onLoadSynthesizer: function(){
             this.loadedSynthesizers ++ ;
             if(this.loadedSynthesizers === this.synthesizers) {
-                this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
+                if (!this.registeredInstrumentButtons) {
+                    this.registeredInstrumentButtons = true ;
+                    this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
+                }
+                else{
+                    this.fire('instrument-buttons-loaded-2') ;
+                }
             }
-        },
-        registerInstrument: function(){
         },
         addGUIAction: function(e){
             if (e.origin === 'playback' || e.origin==='playbackGUI') {
@@ -121,22 +121,22 @@
                 return "reversedVertical" ;
             return "vertical" ;
         },
-        _loadInstrumentNotes: function( loadFunction ){
-            var d = new Date();
-            var id = d.getTime();
-            this.loadingId = id ;
-            this.notesLoaded = 0 ;
+        _loadInstrumentButtonsNotes: function( loadFunction ){
             this.finishedLoading = false ;
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++)
+                nodeList[i].onPitchUpdate()  ;
             loadFunction.call(this) ;
         },
         _loadNote: function(synthId,note){
-            this.$$('#'+synthId).loadNote(note,this.loadingId);
+            this.$$('#'+synthId).loadNote(note);
         },
         onFinishedLoadingNotes: function(){
         },
         addPitch: function(diff){
-            this._setPitch(diff) ;
-            this._loadInstrumentNotes(this._loadNotes) ;
+            this.loadedSynthesizers = 0  ;
+            this._addPitch(diff) ;
+            this._loadInstrumentButtonsNotes(this._loadNotes) ;
         },
         toggleNotesOnButtons: function(which,value){
             var nodeList = Polymer.dom(this.root).querySelectorAll('[button]');
@@ -222,10 +222,10 @@
         ready: function () {
             this.playbackButtonActions = new LinkedList()  ;
             this.instrumentButtonActions = new LinkedList() ;
-            setInterval(this.updateGUI.bind(this),5) ;
+            this.synthesizers = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER').length;
             this.loadedSynthesizers = 0 ;
             this.listen(this,'synthesizer-load','_onLoadSynthesizer') ;
-            this.synthesizers = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER').length;
+            setInterval(this.updateGUI.bind(this),5) ;
         }
     } ;
 </script>
