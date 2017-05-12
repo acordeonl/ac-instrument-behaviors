@@ -61,23 +61,31 @@
                 this.fire('instrument-buttons-loaded-2') ;
             }
         },
+        loadInstrumentAudio: function(e){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            nodeList[e.detail.synthIndex].resetAudio(e.detail.audioURL) ;
+            this.addPitch(0) ;
+        },
         registerInstrumentButtons: function(){
             this.fire('instrument-buttons-loaded',{name:this.name,playbackVolume:this.playbackVolume*100,instrumentVolume:this.instrumentVolume*100,instrumentPanning:this.instrumentPanning*100,playbackPanning:this.playbackPanning*100}) ;
+        },
+        registerSynthesizers: function(){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
+            for (var i = 0; i < nodeList.length; i++) {
+                this.fire('register-synthesizer',{name:nodeList[i].id,buttonsGroupIndex:this.index,synthIndex:i}) ;
+            }
         },
         onFinishedLoadingNotes: function(){
         },
         // ----------------  PITCH -------------------------
         addPitch: function(diff){
             this.loadedSynthesizers = 0  ;
-            this._addPitch(diff) ;
-            this._loadInstrumentButtonsNotes(this._loadNotes) ;
-        },
-        _loadInstrumentButtonsNotes: function( loadFunction ){
             this.finishedLoading = false ;
+            this._addPitch(diff) ;
             var nodeList = Polymer.dom(this.root).querySelectorAll('AC-SYNTHESIZER');
             for (var i = 0; i < nodeList.length; i++)
                 nodeList[i].onPitchUpdate()  ;
-            loadFunction.call(this) ;
+            this._loadNotes();
         },
         _loadNote: function(synthId,note){
             this.$$('#'+synthId).loadNote(note);
@@ -205,7 +213,7 @@
                 nodeList[i].setInstrumentGain(volume) ;
             }
         },
-        
+
         ready: function () {
             this.playbackButtonActions = new LinkedList()  ;
             this.instrumentButtonActions = new LinkedList() ;

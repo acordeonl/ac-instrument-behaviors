@@ -49,10 +49,17 @@
                 if(!this.registeredInstrumentButtons){
                     this.registeredInstrumentButtons = true ;
                     var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
-                    for (var i = 0; i < nodeList.length; i++)
+                    for (var i = 0; i < nodeList.length; i++) {
                         nodeList[i].registerInstrumentButtons() ;
+                        nodeList[i].registerSynthesizers() ;
+                    }
                 }
             }
+        },
+        loadIntrumentAudio: function(e){
+            var nodeList = Polymer.dom(this.root).querySelectorAll('[buttons]');
+            nodeList[e.detail.buttonsGroupIndex].resetAudio(e) ;
+            this.addPitch(0) ;
         },
         // ------------- midi ---------------------
         action: function (e) {
@@ -173,10 +180,11 @@
                 nodeList[i].rotation = e.detail.rotation ;
             }
         },
-        
+
         ready: function () {
             this.loadedInstrumentButtons = 0 ;
             this.totalInstrumentButtons = Polymer.dom(this.root).querySelectorAll('[buttons]').length;
+            this.addPitch(0) ; 
         }
     } ;
 </script>
